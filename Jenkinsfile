@@ -33,15 +33,7 @@ pipeline{
                 }
             }
         }
-        stage('OWASP FS SCAN') {
-            environment {
-                NVD_API_KEY = credentials('NVD_API_KEY')
-            }
-            steps {
-                dependencyCheck additionalArguments: "--scan ./ --disableYarnAudit --disableNodeAudit --nvdApiKey=${NVD_API_KEY}", odcInstallation: 'DP-Check'
-                dependencyCheckPublisher pattern: '**/dependency-check-report.xml'
-            }
-        }
+        
         stage('TRIVY FS SCAN') {
             steps {
                 sh "trivy fs . > trivyfs.json"
@@ -52,15 +44,15 @@ pipeline{
                 script{
                    withDockerRegistry(credentialsId: 'docker', toolName: 'docker'){
                        sh "docker build -t chatbot ."
-                       sh "docker tag chatbot vijay3639/chatbot:latest "
-                       sh "docker push vijay3639/chatbot:latest "
+                       sh "docker tag chatbot muralidharan96/chatbot:latest "
+                       sh "docker push muralidharan96/chatbot:latest "
                     }
                 }
             }
         }
         stage("TRIVY"){
             steps{
-                sh "trivy image vijay3639/chatbot:latest > trivy.json"
+                sh "trivy image muralidharan96/chatbot:latest > trivy.json"
             }
         }
         stage ("Remove container") {
@@ -71,7 +63,7 @@ pipeline{
         }
         stage('Deploy to container'){
             steps{
-                sh 'docker run -d --name chatbot -p 3000:3000 vijay3639/chatbot:latest'
+                sh 'docker run -d --name chatbot -p 3000:3000 muralidharan96/chatbot:latest'
             }
         }
     }
